@@ -12,11 +12,21 @@ class UserInfo(BaseModel):
     name: str
     user_id: str
 
+class AttendanceLog(BaseModel):
+    user_id: str
+    timestamp: str  # ISO format string (e.g., "2025-05-30T19:46:00")
+    status: int
+    punch: int
+
 class DeviceResponse(BaseModel):
     ip: str
     status: str
     message: str
-    users: List[UserInfo]
+    users: List[UserInfo] = []
+    attendances: List[AttendanceLog] = []
 
 class MultiZKUsersResponse(BaseModel):
+    devices: List[DeviceResponse]
+
+class MultiZKAttendanceResponse(BaseModel):
     devices: List[DeviceResponse]
