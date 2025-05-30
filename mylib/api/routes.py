@@ -11,7 +11,7 @@ router = APIRouter()
 async def greet_endpoint(name: str):
     return {"message": greet(name)}
 
-@router.get("/zk/users", response_model=MultiZKUsersResponse)
-async def get_zk_users_endpoint(ip: str, port: int = 4370, password: int = 0):
-    device_config = DeviceConfig(ip=ip, port=port, password=password)
-    return get_zk_users_from_devices([device_config])  # Wrap in a list for compatibility
+# @router.get("/zk/users", response_model=MultiZKUsersResponse)
+# async def get_zk_users_endpoint(ip: str, port: int = 4370, password: int = 0):
+#     device_config = DeviceConfig(ip=ip, port=port, password=password)
+#     return get_zk_users_from_devices([device_config])
