@@ -2,8 +2,8 @@
 from fastapi import APIRouter
 from mylib.core import greet
 # from mylib.zk_device import get_zk_users_from_devices
-from mylib.models import DeviceConfig, MultiZKUsersResponse
-# from typing import List
+# from mylib.models import DeviceConfig, MultiZKUsersResponse
+#   from typing import List
 
 router = APIRouter()
 
