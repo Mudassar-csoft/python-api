@@ -18,7 +18,7 @@ async def greet_endpoint(name: str):
 async def get_zk_users_endpoint(
     ip: str = "103.121.25.3",
     port: int = 4369,
-    password: int = 1122,
+    password: int = 0,
     uid: Optional[int] = None,
     app_state=Depends(get_app_state)
 ):
