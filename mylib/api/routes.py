@@ -1,4 +1,4 @@
-# mylib/api/routes.py (Vercel version)
+# mylib/api/routes.py
 from fastapi import APIRouter
 from mylib.core import greet
 
