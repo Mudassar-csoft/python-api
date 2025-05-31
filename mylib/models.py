@@ -1,9 +1,9 @@
 # mylib/models.py
-from pydantic import BaseModel, IPvAnyAddress
+from pydantic import BaseModel
 from typing import List
 
 class DeviceConfig(BaseModel):
-    ip: IPvAnyAddress
+    ip: str
     port: int = 4370
     password: int = 0
 
@@ -14,7 +14,7 @@ class UserInfo(BaseModel):
 
 class AttendanceLog(BaseModel):
     user_id: str
-    timestamp: str  # ISO format string (e.g., "2025-05-30T19:46:00")
+    timestamp: str
     status: int
     punch: int
 
