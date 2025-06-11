@@ -10,9 +10,6 @@ app = FastAPI(title="My Python API")
 
 app.include_router(router, prefix="/api/v1")
 
-# Use public IP directly
-app.state.ngrok_host = "103.121.25.3"
-app.state.ngrok_port = 4369
 
 if __name__ == "__main__":
     import uvicorn
