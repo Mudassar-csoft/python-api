@@ -30,3 +30,6 @@ class MultiZKUsersResponse(BaseModel):
 
 class MultiZKAttendanceResponse(BaseModel):
     devices: List[DeviceResponse]
+
+class CampusRequest(BaseModel):
+    campus_id: int
