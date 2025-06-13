@@ -33,3 +33,14 @@ class MultiZKAttendanceResponse(BaseModel):
 
 class CampusRequest(BaseModel):
     campus_id: int
+
+class ZKUpdateUserIdRequest(BaseModel):
+    campus_id: int
+    old_user_id: str  # existing user_id in device
+    new_user_id: str  # new user_id to update to
+ 
+
+class ZKAddUserRequest(BaseModel):
+    campus_id: int
+    user_id: str
+    name: str
