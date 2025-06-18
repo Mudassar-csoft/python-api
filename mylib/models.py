@@ -1,6 +1,6 @@
 # mylib/models.py
 from pydantic import BaseModel
-from typing import List
+from typing import List,Optional
 
 class DeviceConfig(BaseModel):
     ip: str
@@ -36,11 +36,16 @@ class CampusRequest(BaseModel):
 
 class ZKUpdateUserIdRequest(BaseModel):
     campus_id: int
-    old_user_id: str  # existing user_id in device
-    new_user_id: str  # new user_id to update to
- 
+    old_user_id: str
+    new_user_id: str
+    name: Optional[str] = None
+    privilege: Optional[int] = None
+
 
 class ZKAddUserRequest(BaseModel):
     campus_id: int
     user_id: str
     name: str
+    privilege: int = 0
+    password: str = ''
+    group_id: int = 1

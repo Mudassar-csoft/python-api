@@ -79,12 +79,15 @@ async def update_user_id(payload: ZKUpdateUserIdRequest):
         if not user_to_update:
             raise HTTPException(status_code=404, detail=f"User with user_id {payload.old_user_id} not found.")
 
-        # Directly update the user_id
+        # Use fallback for optional fields
+        updated_name = payload.name if payload.name is not None else user_to_update.name
+        updated_privilege = payload.privilege if payload.privilege is not None else user_to_update.privilege
+
         conn.set_user(
             uid=user_to_update.uid,
-            user_id=payload.new_user_id,  # 🔁 New user_id
-            name=user_to_update.name,
-            privilege=user_to_update.privilege,
+            user_id=payload.new_user_id,
+            name=updated_name,
+            privilege=updated_privilege,
             password=user_to_update.password,
             group_id=user_to_update.group_id,
         )
@@ -98,8 +101,7 @@ async def update_user_id(payload: ZKUpdateUserIdRequest):
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"ZK Error: {str(e)}")
-
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/zk/employees", tags=["ZKTeco"])
 async def add_user_to_zk(payload: ZKAddUserRequest):
@@ -120,12 +122,12 @@ async def add_user_to_zk(payload: ZKAddUserRequest):
 
         # Add user (no fingerprint yet)
         conn.set_user(
-            uid=None,  # Let device assign UID
+            uid=None,
             user_id=payload.user_id,
             name=payload.name,
-            privilege=0,  # 0 = normal user
-            password='',
-            group_id='',
+            privilege=payload.privilege,
+            password=payload.password,
+            group_id=payload.group_id
         )
 
         conn.enable_device()
