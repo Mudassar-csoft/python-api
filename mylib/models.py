@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import List,Optional
 
 class DeviceConfig(BaseModel):
+    campus_id: int
     ip: str
     port: int = 4370
     password: int = 0
@@ -19,6 +20,7 @@ class AttendanceLog(BaseModel):
     punch: int
 
 class DeviceResponse(BaseModel):
+    campus_id: int
     ip: str
     status: str
     message: str

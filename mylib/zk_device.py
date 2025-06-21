@@ -32,7 +32,7 @@ def get_zk_users_from_devices(device_configs: List[DeviceConfig]) -> MultiZKUser
     results = []
     for config in device_configs:
         conn = None
-        device_result = DeviceResponse(ip=str(config.ip), status="error", message="", users=[], attendances=[])
+        device_result = DeviceResponse(campus_id=config.campus_id, status="error", message="", users=[], attendances=[])
         try:
             logger.info(f"Connecting to {config.ip}:{config.port}")
             conn = connect_to_device(config)
@@ -44,7 +44,7 @@ def get_zk_users_from_devices(device_configs: List[DeviceConfig]) -> MultiZKUser
                 for user in users
             ]
             device_result.status = "success"
-            device_result.message = f"Users retrieved successfully from {config.ip}"
+            device_result.message = f"Users retrieved successfully from {config.campus_id}"
         except Exception as e:
             logger.error(f"Error connecting to {config.ip}: {str(e)}")
             device_result.message = f"Error connecting to {config.ip}: {str(e)}"
@@ -60,7 +60,7 @@ def get_zk_attendance_from_devices(device_configs: List[DeviceConfig]) -> MultiZ
     results = []
     for config in device_configs:
         conn = None
-        device_result = DeviceResponse(ip=str(config.ip), status="error", message="", users=[], attendances=[])
+        device_result = DeviceResponse(campus_id=config.campus_id, status="error", message="", users=[], attendances=[])
         try:
             logger.info(f"Connecting to {config.ip}:{config.port} for attendance")
             conn = connect_to_device(config)
@@ -77,7 +77,7 @@ def get_zk_attendance_from_devices(device_configs: List[DeviceConfig]) -> MultiZ
                 for attendance in attendances
             ]
             device_result.status = "success"
-            device_result.message = f"Attendance retrieved successfully from {config.ip}"
+            device_result.message = f"Attendance retrieved successfully from {config.campus_id}"
         except Exception as e:
             logger.error(f"Error connecting to {config.ip}: {str(e)}")
             device_result.message = f"Error connecting to {config.ip}: {str(e)}"
