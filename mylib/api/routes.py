@@ -23,7 +23,7 @@ async def greet_endpoint(name: str):
 
 # Secure campus config mapping
 DEVICE_CONFIG = {
-    9: {"ip": "103.121.25.3", "port": 4369, "password": 1122},
+    9: {"ip": "10.20.0.200", "port": 4369, "password": 1122},
     7: {"ip": "103.121.25.6", "port": 4369, "password": 1122},
     8: {"ip": "103.121.25.4", "port": 4369, "password": 1122},
     20: {"ip": "101.53.242.96", "port": 4369, "password": 1122},
