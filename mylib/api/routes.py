@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query, Request,HTTPException
 from typing import Annotated, Optional
 from mylib.core import greet
+from mylib.security import verify_api_key  # Adjust path accordingly
 from zk import ZK
 from mylib.zk_device import get_zk_users_from_devices, get_zk_attendance_from_devices
 from mylib.models import DeviceConfig, MultiZKUsersResponse, MultiZKAttendanceResponse, CampusRequest, ZKUpdateUserIdRequest,ZKAddUserRequest
@@ -23,7 +24,7 @@ async def greet_endpoint(name: str):
 
 # Secure campus config mapping
 DEVICE_CONFIG = {
-    9: {"ip": "10.20.0.200", "port": 4370, "password": 1122},
+    # 9: {"ip": "10.20.0.200", "port": 4370, "password": 1122},
     7: {"ip": "103.121.25.6", "port": 4369, "password": 1122},
     8: {"ip": "103.121.25.4", "port": 4369, "password": 1122},
     20: {"ip": "101.53.242.96", "port": 4369, "password": 1122},
@@ -33,7 +34,8 @@ DEVICE_CONFIG = {
 @router.post("/zk/users", response_model=MultiZKUsersResponse, tags=["ZKTeco"])
 async def get_zk_users_by_campus(
     payload: CampusRequest,
-    app_state=Depends(get_app_state)
+    app_state=Depends(get_app_state),
+    _=Depends(verify_api_key)
 ):
     config = DEVICE_CONFIG.get(payload.campus_id)
     if not config:
@@ -48,7 +50,8 @@ async def get_zk_users_by_campus(
 @router.post("/zk/attendance", response_model=MultiZKAttendanceResponse, tags=["ZKTeco"])
 async def get_zk_attendance_by_campus(
     payload: CampusRequest,
-    app_state=Depends(get_app_state)
+    app_state=Depends(get_app_state),
+    _=Depends(verify_api_key)
 ):
     config = DEVICE_CONFIG.get(payload.campus_id)
     if not config:
@@ -62,14 +65,14 @@ async def get_zk_attendance_by_campus(
 
 
 @router.post("/zk/user/update-id", tags=["ZKTeco"])
-async def update_user_id(payload: ZKUpdateUserIdRequest):
+async def update_user_id(payload: ZKUpdateUserIdRequest,   _=Depends(verify_api_key)):
     config = DEVICE_CONFIG.get(payload.campus_id)
     if not config:
         raise HTTPException(status_code=404, detail="Invalid campus_id")
 
     try:
         zk = ZK(config['ip'], port=config['port'], timeout=5, password=config['password'], force_udp=False)
-        conn = zk.connect()
+        conn = zk.connect()   
         conn.disable_device()
 
         # Get existing users and find the one to update
@@ -104,7 +107,7 @@ async def update_user_id(payload: ZKUpdateUserIdRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/zk/employees", tags=["ZKTeco"])
-async def add_user_to_zk(payload: ZKAddUserRequest):
+async def add_user_to_zk(payload: ZKAddUserRequest,   _=Depends(verify_api_key)):
     config = DEVICE_CONFIG.get(payload.campus_id)
     if not config:
         raise HTTPException(status_code=404, detail="Invalid campus_id")
@@ -140,3 +143,23 @@ async def add_user_to_zk(payload: ZKAddUserRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"ZK Error: {str(e)}")
+
+
+@router.get("/zk/all-users", response_model=MultiZKUsersResponse, tags=["ZKTeco"])
+async def get_all_zk_users(
+    app_state=Depends(get_app_state),
+    _=Depends(verify_api_key)  # protect the route
+):
+    device_list = [DeviceConfig(**cfg) for cfg in DEVICE_CONFIG.values()]
+    response = get_zk_users_from_devices(device_list)
+    return response
+
+
+@router.get("/zk/all-attendance", response_model=MultiZKAttendanceResponse, tags=["ZKTeco"])
+async def get_all_zk_attendance(
+    app_state=Depends(get_app_state),
+    _=Depends(verify_api_key)
+):
+    device_list = [DeviceConfig(**cfg) for cfg in DEVICE_CONFIG.values()]
+    response = get_zk_attendance_from_devices(device_list)
+    return response
