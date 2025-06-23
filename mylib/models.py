@@ -51,3 +51,7 @@ class ZKAddUserRequest(BaseModel):
     privilege: int = 0
     password: str = ''
     group_id: int = 1
+    
+class ZKDeleteUserRequest(BaseModel):
+    campus_id: int
+    user_id: str  # user_id in the machine

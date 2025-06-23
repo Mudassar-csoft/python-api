@@ -5,7 +5,7 @@ from zk import ZK
 from mylib.zk_device import get_zk_users_from_devices, get_zk_attendance_from_devices
 from mylib.models import (
     DeviceConfig, MultiZKUsersResponse, MultiZKAttendanceResponse,
-    CampusRequest, ZKUpdateUserIdRequest, ZKAddUserRequest
+    CampusRequest, ZKUpdateUserIdRequest, ZKAddUserRequest, ZKDeleteUserRequest
 )
 import logging
 
@@ -165,3 +165,41 @@ async def check_device_status(campus_id: int, _=Depends(verify_api_key)):
     except Exception as e:
         logger.warning(f"Device at campus {campus_id} is offline: {e}")
         return {"status": "offline", "message": str(e)}
+    
+    
+   
+
+@router.post("/zk/delete-user", tags=["ZKTeco"])
+async def delete_zk_user(payload: ZKDeleteUserRequest, _=Depends(verify_api_key)):
+    config = DEVICE_CONFIG.get(payload.campus_id)
+    if not config:
+        raise HTTPException(status_code=404, detail="Invalid campus_id")
+
+    try:
+        zk = ZK(
+            config['ip'],
+            port=config['port'],
+            timeout=5,
+            password=config['password'],
+            force_udp=True
+        )
+        conn = zk.connect()
+        conn.disable_device()
+
+        users = conn.get_users()
+        target = next((u for u in users if str(u.user_id) == str(payload.user_id)), None)
+
+        if not target:
+            conn.enable_device()
+            conn.disconnect()
+            raise HTTPException(status_code=404, detail=f"User {payload.user_id} not found")
+
+        conn.delete_user(uid=target.uid)
+        conn.enable_device()
+        conn.disconnect()
+
+        return {"status": "success", "message": f"User {payload.user_id} deleted from ZKTeco device"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"ZK Error: {str(e)}")
+
