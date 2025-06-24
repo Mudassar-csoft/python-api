@@ -14,8 +14,9 @@ logger = logging.getLogger(__name__)
 
 # Secure campus config mapping
 DEVICE_CONFIG = {
-    7: {"ip": "103.121.25.6", "port": 4369, "password": 1122},
-    8: {"ip": "103.121.25.4", "port": 4369, "password": 1122},
+    9:  {"ip": "182.191.118.104","port":4369,"password":1122},
+    7:  {"ip": "103.121.25.6","port": 4369, "password": 1122},
+    8:  {"ip": "103.121.25.4", "port": 4369, "password": 1122},
     20: {"ip": "101.53.242.96", "port": 4369, "password": 1122},
 }
 
