@@ -5,7 +5,7 @@ from zk import ZK
 from mylib.zk_device import get_zk_users_from_devices, get_zk_attendance_from_devices
 from mylib.models import (
     DeviceConfig, MultiZKUsersResponse, MultiZKAttendanceResponse,
-    CampusRequest, ZKUpdateUserIdRequest, ZKAddUserRequest, ZKDeleteUserRequest
+    CampusRequest, ZKUpdateUserIdRequest, ZKAddUserRequest, ZKDeleteUserRequest,MultiCampusRequest
 )
 import logging
 
@@ -204,3 +204,41 @@ async def delete_zk_user(payload: ZKDeleteUserRequest, _=Depends(verify_api_key)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"ZK Error: {str(e)}")
 
+@router.post("/zk/devices-status", tags=["ZKTeco"])
+async def check_multiple_zkteco_devices(payload: MultiCampusRequest,  _=Depends(verify_api_key)):
+    results = []
+
+    for campus_id in payload.campus_ids:
+        config = DEVICE_CONFIG.get(campus_id)
+
+        if not config:
+            results.append({
+                "campus_id": campus_id,
+                "status": "not_configured",
+                "message": "No device configuration found."
+            })
+            continue
+
+        ip = config["ip"]
+        port = config.get("port", 4370)
+        password = config.get("password", 0)
+
+        zk = ZK(ip, port=port, password=password, timeout=3)
+        try:
+            conn = zk.connect()
+            conn.disconnect()
+            results.append({
+                "campus_id": campus_id,
+                "ip": ip,
+                "status": "online",
+                "message": "ZKTeco device is online."
+            })
+        except Exception as e:
+            results.append({
+                "campus_id": campus_id,
+                "ip": ip,
+                "status": "offline",
+                "message": str(e)
+            })
+
+    return {"devices": results}

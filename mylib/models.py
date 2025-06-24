@@ -55,3 +55,6 @@ class ZKAddUserRequest(BaseModel):
 class ZKDeleteUserRequest(BaseModel):
     campus_id: int
     user_id: str  # user_id in the machine
+
+class MultiCampusRequest(BaseModel):
+    campus_ids: List[int]
