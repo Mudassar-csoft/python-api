@@ -104,20 +104,23 @@ async def update_user_id(payload: ZKUpdateUserIdRequest, _=Depends(verify_api_ke
 async def add_user_to_zk(payload: ZKAddUserRequest, _=Depends(verify_api_key)):
     config = DEVICE_CONFIG.get(payload.campus_id)
     if not config:
-        raise HTTPException(status_code=404, detail="Invalid campus_id")
+        raise HTTPException(status_code=404, detail=f"Invalid campus_id: {payload.campus_id}")
+
+    logger.info(f"Config for campus_id {payload.campus_id}: {config}")  # Debug log
 
     try:
         zk = ZK(config["ip"], port=config["port"], timeout=5, password=config["password"], force_udp=False)
         conn = zk.connect()
+        logger.info("Device connected successfully")  # Debug log
         conn.disable_device()
 
         conn.set_user(
             uid=None,
-            user_id=payload.user_id,
+            user_id=str(payload.user_id),
             name=payload.name,
             privilege=payload.privilege,
             password=payload.password,
-            group_id=payload.group_id
+            group_id=str(payload.group_id)
         )
 
         conn.enable_device()
@@ -131,8 +134,7 @@ async def add_user_to_zk(payload: ZKAddUserRequest, _=Depends(verify_api_key)):
     except Exception as e:
         logger.exception("Add user failed")
         raise HTTPException(status_code=500, detail=f"ZK Error: {str(e)}")
-
-
+            
 # Fetch all users from all devices
 @router.get("/zk/all-users", response_model=MultiZKUsersResponse, tags=["ZKTeco"])
 async def get_all_zk_users(_=Depends(verify_api_key)):
