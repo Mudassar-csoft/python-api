@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 
 # Secure campus config mapping
 DEVICE_CONFIG = {
-    9:  {"ip": "182.191.118.104","port":4369,"password":1122},
-    7:  {"ip": "103.121.25.6","port": 4369, "password": 1122},
-    8:  {"ip": "103.121.25.4", "port": 4369, "password": 1122},
+    9:  {"ip": "101.53.242.172","port":4369,"password":1122},
+    7:  {"ip": "101.53.242.173","port": 4369, "password": 1122},
+    8:  {"ip": "101.53.242.171", "port": 4369, "password": 1122},
     20: {"ip": "101.53.242.96", "port": 4369, "password": 1122},
 }
 
@@ -178,34 +178,43 @@ async def delete_zk_user(payload: ZKDeleteUserRequest, _=Depends(verify_api_key)
     if not config:
         raise HTTPException(status_code=404, detail="Invalid campus_id")
 
+    logger.info(f"Attempting to connect to {config['ip']}:{config['port']} with password {config['password']}")
+
     try:
         zk = ZK(
             config['ip'],
             port=config['port'],
-            timeout=5,
+            timeout=20,  # Increased to 20 seconds
             password=config['password'],
-            force_udp=True
+            force_udp=False  # Using TCP
         )
+        logger.info(f"Initializing connection to {config['ip']}:{config['port']}")
         conn = zk.connect()
+        logger.info("Device connected successfully")
         conn.disable_device()
 
+        logger.info("Fetching users from device")
         users = conn.get_users()
-        target = next((u for u in users if str(u.user_id) == str(payload.user_id)), None)
+        logger.info(f"Found {len(users)} users. Searching for user_id: {payload.user_id}")
+        target = next((u for u in users if str(u.user_id) == payload.user_id), None)  # Direct string comparison
 
         if not target:
             conn.enable_device()
             conn.disconnect()
             raise HTTPException(status_code=404, detail=f"User {payload.user_id} not found")
 
+        logger.info(f"Deleting user with UID {target.uid} and user_id {target.user_id}")
         conn.delete_user(uid=target.uid)
+        logger.info(f"User {payload.user_id} deleted successfully")
         conn.enable_device()
         conn.disconnect()
 
         return {"status": "success", "message": f"User {payload.user_id} deleted from ZKTeco device"}
 
     except Exception as e:
+        logger.exception("Delete user failed")
         raise HTTPException(status_code=500, detail=f"ZK Error: {str(e)}")
-
+      
 @router.post("/zk/devices-status", tags=["ZKTeco"])
 async def check_multiple_zkteco_devices(payload: MultiCampusRequest,  _=Depends(verify_api_key)):
     results = []
