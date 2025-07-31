@@ -85,7 +85,7 @@ def get_zk_attendance_from_devices(device_configs: List[DeviceConfig]) -> MultiZ
             attendances = conn.get_attendance()
             device_result.attendances = [
                 AttendanceLog(
-                    id=attendance.attendance_id,
+                    uid=str(attendance.uid),
                     user_id=attendance.user_id,
                     timestamp=attendance.timestamp.isoformat(),
                     status=attendance.status,
@@ -93,6 +93,10 @@ def get_zk_attendance_from_devices(device_configs: List[DeviceConfig]) -> MultiZ
                 )
                 for attendance in attendances
             ]
+            # for attendance in attendances:
+            #     logger.info(f"Attendance Object: {attendance}")
+            #     logger.info(f"Attendance Attributes: {dir(attendance)}")  
+
             device_result.status = "success"
             device_result.message = f"Attendance retrieved successfully from {config.campus_id}"
         except Exception as e:
