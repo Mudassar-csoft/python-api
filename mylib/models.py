@@ -14,7 +14,7 @@ class UserInfo(BaseModel):
     user_id: str
 
 class AttendanceLog(BaseModel):
-    uid:str
+    uid:str #uid for unique
     user_id: str
     timestamp: str
     status: int

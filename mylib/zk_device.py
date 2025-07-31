@@ -85,7 +85,7 @@ def get_zk_attendance_from_devices(device_configs: List[DeviceConfig]) -> MultiZ
             attendances = conn.get_attendance()
             device_result.attendances = [
                 AttendanceLog(
-                    uid=str(attendance.uid), #unique  id 
+                    uid=str(attendance.uid),
                     user_id=attendance.user_id,
                     timestamp=attendance.timestamp.isoformat(),
                     status=attendance.status,
